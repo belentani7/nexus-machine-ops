@@ -1,0 +1,24 @@
+# Project TODO
+
+- [x] Documentar el protocolo de triple confirmación independiente: política y rol, estado/riesgo del simulador y aprobación humana explícita.
+- [x] Documentar los límites de seguridad: modo simulación obligatorio, sin conexión física, sin control autónomo ni acciones irreversibles.
+- [x] Definir los roles de observación, preparación, aprobación y administración de políticas.
+- [x] Modelar y migrar datos persistentes para máquinas simuladas, telemetría, comandos, aprobaciones, eventos, alarmas, trazas y auditoría.
+- [x] Implementar contratos tipados de comandos y un gateway abstracto exclusivamente en modo simulación.
+- [x] Implementar el simulador determinista con estados protegidos, telemetría sintética, alarmas y recuperación controlada.
+- [x] Implementar validación de política/rol, validación de estado/riesgo, aprobación humana, expiración e idempotencia de comandos.
+- [x] Registrar decisiones, rechazos y ejecuciones en una auditoría append-only a nivel de aplicación.
+- [x] Crear procedimientos de servidor para consulta de estado, cola de comandos, aprobación y auditoría.
+- [x] Separar la interfaz MachineAdapter y el gateway de simulación de la lógica de servicio para preparar una sustitución futura segura.
+- [x] Generar y recuperar alarmas simuladas a partir de telemetría y estados, con sus eventos y trazas de auditoría.
+- [x] Impedir la autoaprobación de comandos críticos para asegurar independencia humana real entre solicitante y aprobador.
+- [x] Cubrir el gateway, las alarmas y la regla de independencia con pruebas automatizadas.
+- [x] Crear un centro de operaciones en tiempo real con estado de la máquina, telemetría, alertas, cola de comandos y tres nodos visibles.
+- [x] Aplicar una interfaz elegante, accesible, responsiva y legible para el centro de operaciones.
+- [x] Implementar actualización realmente en tiempo real mediante SSE para los cambios de estado y eventos del simulador.
+- [x] Añadir estados accesibles de error y reintento para la consulta del centro de operaciones.
+- [x] Verificar y ajustar la interfaz en móvil y tableta antes de dar por cerrada la respuesta visual.
+- [x] Verificar el centro de operaciones en viewport de tableta, corregir cualquier problema de layout y registrar la validación.
+- [x] Escribir pruebas de autorización, rechazos por política/estado, aprobación incompleta, expiración e integridad de la trazabilidad.
+- [x] Documentar arquitectura, límites del simulador, roles, protocolo de confirmación y requisitos para una futura integración física certificada.
+- [x] Ejecutar pruebas, verificación de tipos y revisión visual de los flujos críticos.
