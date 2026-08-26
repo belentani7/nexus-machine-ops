@@ -21,4 +21,10 @@
 - [x] Verificar el centro de operaciones en viewport de tableta, corregir cualquier problema de layout y registrar la validación.
 - [x] Escribir pruebas de autorización, rechazos por política/estado, aprobación incompleta, expiración e integridad de la trazabilidad.
 - [x] Documentar arquitectura, límites del simulador, roles, protocolo de confirmación y requisitos para una futura integración física certificada.
-- [x] Ejecutar pruebas, verificación de tipos y revisión visual de los flujos críticos.
+- [x] Executar provas, verificação de tipos e revisão visual dos fluxos críticos.
+- [x] Auditar, por nó, a coerência entre promessa, capacidade implementada, evidência, dependências e limite operacional.
+- [x] Produzir uma matriz explícita de auditoria para N1, N2 e N3, com promessa, implementação, evidência, dependências, limites e veredito.
+- [x] Documentar achados e lacunas, distinguindo ativos demonstrados, preparados, conceituais e ausentes.
+- [x] Classificar ativos, IA, protocolos, captura de informação e relatórios por maturidade: demonstrado, preparado, conceitual ou ausente.
+- [x] Identificar desvios entre a narrativa da plataforma, a implementação executável e os controles efetivamente verificados.
+- [x] Produzir relatório de auditoria com critérios de saúde, plano de elevação e requisitos bloqueadores para qualquer expansão física ou autônoma.
