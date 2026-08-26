@@ -28,3 +28,6 @@
 - [x] Classificar ativos, IA, protocolos, captura de informação e relatórios por maturidade: demonstrado, preparado, conceitual ou ausente.
 - [x] Identificar desvios entre a narrativa da plataforma, a implementação executável e os controles efetivamente verificados.
 - [x] Produzir relatório de auditoria com critérios de saúde, plano de elevação e requisitos bloqueadores para qualquer expansão física ou autônoma.
+- [x] Crear un prompt maestro independiente de interfaz para generar la infraestructura de simulación, auditoría y gobernanza.
+- [x] Incluir en el prompt los contratos, modelos de datos, controles, pruebas, observabilidad y criterios de aceptación exigibles.
+- [x] Revisar el prompt contra los límites de simulación y entregar instrucciones de uso compatibles con generadores de código.
