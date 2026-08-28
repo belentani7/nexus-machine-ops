@@ -58,3 +58,8 @@
 - [x] Calcular hashes reais ou documentar de forma explícita a limitação técnica para os artefatos de Drive.
 - [x] Ampliar a análise de duplicação do GitHub por descrições e sinais de família/derivação, sem afirmar equivalência de código sem diff.
 - [x] Só remarcar a análise ampla de metadados quando a duplicação estiver refletida com evidência suficiente no relatório.
+
+- [x] Definir una tesis única que englobe creación, IA, automatización, evidencia, documentos, negocio y impacto.
+- [x] Mapear capacidades comunes y separar plataforma, productos verticales, laboratorio y activos independientes.
+- [x] Definir arquitectura de portafolio, operación, modelo de valor y criterios de priorización.
+- [x] Documentar la dirección estratégica y las decisiones ejecutables para los próximos 90 días.
