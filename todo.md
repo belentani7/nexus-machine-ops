@@ -67,3 +67,8 @@
 - [x] Delimitar as evidências observáveis usadas no retrato profissional e comportamental.
 - [x] Separar padrões profissionais, estilo cognitivo de trabalho, fortalezas e riscos sem diagnóstico.
 - [x] Entregar uma leitura equilibrada, com hipóteses explícitas e recomendações práticas de estrutura.
+
+- [x] Revisar la documentación actual y detectar cualquier explicación incompleta de la idea y dirección NEXUS.
+- [x] Crear un documento raíz del proyecto que explique la visión completa, módulos, capacidades, límites, gobernanza y roadmap.
+- [ ] Verificar que todos los archivos distintivos de código, documentación y evidencia estén presentes y rastreados.
+- [ ] Subir el estado completo y verificado al repositorio privado de GitHub.
