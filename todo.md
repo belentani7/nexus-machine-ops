@@ -63,3 +63,7 @@
 - [x] Mapear capacidades comunes y separar plataforma, productos verticales, laboratorio y activos independientes.
 - [x] Definir arquitectura de portafolio, operación, modelo de valor y criterios de priorización.
 - [x] Documentar la dirección estratégica y las decisiones ejecutables para los próximos 90 días.
+
+- [x] Delimitar as evidências observáveis usadas no retrato profissional e comportamental.
+- [x] Separar padrões profissionais, estilo cognitivo de trabalho, fortalezas e riscos sem diagnóstico.
+- [x] Entregar uma leitura equilibrada, com hipóteses explícitas e recomendações práticas de estrutura.
