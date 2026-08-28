@@ -31,3 +31,16 @@
 - [x] Crear un prompt maestro independiente de interfaz para generar la infraestructura de simulación, auditoría y gobernanza.
 - [x] Incluir en el prompt los contratos, modelos de datos, controles, pruebas, observabilidad y criterios de aceptación exigibles.
 - [x] Revisar el prompt contra los límites de simulación y entregar instrucciones de uso compatibles con generadores de código.
+
+- [ ] Inventariar conectores disponíveis e distinguir integrações habilitadas, ausentes e sem acesso.
+- [ ] Inventariar repositórios GitHub e seus sinais de atividade, escopo e reutilização.
+- [ ] Inventariar arquivos e áreas relevantes de Drive sem alterar nem excluir dados.
+- [ ] Classificar atividades, ativos e padrões repetidos em um mapa de capacidades do usuário.
+- [ ] Criar proposta unificadora realista com arquitetura, módulos, governança, segurança, roadmap e limites.
+- [ ] Entregar relatório de evidências, incertezas e próximos passos verificáveis.
+
+## Auditoria do ecossistema
+
+- [ ] Confirmar a lista de fontes paralelizáveis: GitHub e Drive podem ser inventariados em paralelo; configuração de conectores deve ser lida antes para saber quais fontes adicionais estão disponíveis.
+- [ ] Preservar o princípio de somente leitura: não criar, editar, mover, publicar ou excluir recursos externos durante o inventário.
+- [ ] Separar fatos observados de interpretações e propostas.
