@@ -47,3 +47,14 @@
 - [x] Reexecutar o inventário GitHub com saída JSON limpa e preservar `updatedAt`/`pushedAt` sem campos nulos indevidos.
 - [x] Gerar resumo explícito de repositórios recentes, inativos, públicos/privados e linguagens.
 - [x] Incorporar o resumo de atividade ao relatório da proposta e fechar o item GitHub somente após validação.
+
+- [x] Analisar metadados de GitHub e Drive por atividade, visibilidade, tipos, duplicação e recência.
+- [x] Medir concentração e sobreposição de nichos, identificando padrões de portfólio e dispersão.
+- [x] Comparar cadência temporal com sinais de tração, manutenção e ciclos de produção.
+- [x] Produzir leitura executiva com oportunidades prioritárias, riscos e decisões recomendadas.
+- [x] Calcular agrupamentos de artefatos de Drive por base de nome, versão, hash e família de backup.
+- [x] Identificar sinais de duplicação ou derivação entre repositórios GitHub por nomes, descrições e famílias sem declarar equivalência de código sem diff.
+- [x] Incorporar contagem, exemplos, critérios e impacto operacional da duplicação no relatório.
+- [x] Calcular hashes reais ou documentar de forma explícita a limitação técnica para os artefatos de Drive.
+- [x] Ampliar a análise de duplicação do GitHub por descrições e sinais de família/derivação, sem afirmar equivalência de código sem diff.
+- [x] Só remarcar a análise ampla de metadados quando a duplicação estiver refletida com evidência suficiente no relatório.
