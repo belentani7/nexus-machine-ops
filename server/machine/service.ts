@@ -15,7 +15,7 @@ import type { CommandInput, CommandStatus, CommandType, MachineState, Operationa
 import { SimulationGateway } from "./gateway";
 import { calculateAuditHash } from "./audit";
 import { expectedSimulatedAlarm } from "./alarms";
-import { effectiveRole, evaluateHumanApproval, evaluatePolicy, type ProtocolActor } from "./protocol";
+import { assertSameIdempotentRequest, effectiveRole, evaluateHumanApproval, evaluatePolicy, type ProtocolActor } from "./protocol";
 import { publishOperationsUpdate } from "./stream";
 import { commandRiskSummary } from "./simulator";
 
@@ -228,7 +228,12 @@ export async function requestCommand(actor: Actor, input: CommandInput) {
   const db = await requireDb();
   const machine = await getMachine(input.machineId);
   const [duplicate] = await db.select().from(machineCommands).where(eq(machineCommands.idempotencyKey, input.idempotencyKey)).limit(1);
-  if (duplicate) return duplicate;
+  if (duplicate) {
+    assertSameIdempotentRequest(duplicate, {
+      requesterId: actor.id, machineId: input.machineId, type: input.type, testMode: Boolean(input.testMode ?? true)
+    });
+    return duplicate;
+  }
 
   const commandId = randomUUID();
   const policy = evaluatePolicy(actor, input.type, "simulation", Boolean(input.testMode ?? true));
