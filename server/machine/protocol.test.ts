@@ -25,6 +25,17 @@ describe("triple confirmation protocol", () => {
     expect(result).toMatchObject({ approved: false, decision: "expired" });
   });
 
+  it("fails closed on invalid or nonsensical approval timestamps", () => {
+    const invalidExpiration = evaluateHumanApproval({
+      requesterId: operator.id, approver, expiresAt: new Date("invalid")
+    });
+    expect(invalidExpiration).toMatchObject({ approved: false, decision: "expired" });
+    const invalidNow = evaluateHumanApproval({
+      requesterId: operator.id, approver, expiresAt: new Date(Date.now() + 60_000), now: new Date("invalid")
+    });
+    expect(invalidNow).toMatchObject({ approved: false, decision: "expired" });
+  });
+
   it("requires all three nodes before a command can proceed", () => {
     expect(tripleConfirmationComplete({ policy: true, risk: true, human: false })).toBe(false);
     expect(tripleConfirmationComplete({ policy: true, risk: true, human: true })).toBe(true);
