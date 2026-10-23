@@ -30,5 +30,9 @@ jobs:
             echo "present=false" >> "$GITHUB_OUTPUT"
             echo "No build script declared in package.json."
           fi
+      - name: Validate TypeScript
+        run: pnpm run check
+      - name: Run simulator safety and service regression tests
+        run: pnpm run test
       - if: steps.buildscript.outputs.present == 'true'
         run: pnpm run build
