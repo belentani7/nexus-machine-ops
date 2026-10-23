@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { calculateAuditHash } from "./audit";
-import { evaluateHumanApproval, evaluatePolicy, tripleConfirmationComplete } from "./protocol";
+import { assertSameIdempotentRequest, evaluateHumanApproval, evaluatePolicy, tripleConfirmationComplete } from "./protocol";
 
 describe("triple confirmation protocol", () => {
   const operator = { id: 7, role: "user" as const, operationRole: "operator" as const };
@@ -23,6 +23,31 @@ describe("triple confirmation protocol", () => {
   it("expires incomplete approvals", () => {
     const result = evaluateHumanApproval({ requesterId: operator.id, approver, expiresAt: new Date(Date.now() - 1) });
     expect(result).toMatchObject({ approved: false, decision: "expired" });
+  });
+
+  it("fails closed on invalid or nonsensical approval timestamps", () => {
+    const invalidExpiration = evaluateHumanApproval({
+      requesterId: operator.id, approver, expiresAt: new Date("invalid")
+    });
+    expect(invalidExpiration).toMatchObject({ approved: false, decision: "expired" });
+    const invalidNow = evaluateHumanApproval({
+      requesterId: operator.id, approver, expiresAt: new Date(Date.now() + 60_000), now: new Date("invalid")
+    });
+    expect(invalidNow).toMatchObject({ approved: false, decision: "expired" });
+  });
+
+  it("rejects idempotency collisions across users, commands and machines", () => {
+    const existing = { requestedByUserId: 7, machineId: 1, type: "start", isTestMode: 1 };
+    expect(() => assertSameIdempotentRequest(existing, {
+      requesterId: 7, machineId: 1, type: "start", testMode: true
+    })).not.toThrow();
+    for (const change of [
+      { requesterId: 9 }, { machineId: 2 }, { type: "stop" }, { testMode: false }
+    ]) {
+      expect(() => assertSameIdempotentRequest(existing, {
+        requesterId: 7, machineId: 1, type: "start", testMode: true, ...change
+      } as Parameters<typeof assertSameIdempotentRequest>[1])).toThrow(/idempotencia/);
+    }
   });
 
   it("requires all three nodes before a command can proceed", () => {
