@@ -34,3 +34,19 @@ export function evaluateHumanApproval(input: { requesterId: number; approver: Pr
 export function tripleConfirmationComplete(input: { policy: boolean; risk: boolean; human: boolean }) {
   return input.policy && input.risk && input.human;
 }
+
+/**
+ * Reusing an idempotency key is safe only for the SAME requester, machine,
+ * command and simulation mode. Never disclose a different user's command.
+ */
+export function assertSameIdempotentRequest(
+  existing: { requestedByUserId: number; machineId: number; type: string; isTestMode: number },
+  requested: { requesterId: number; machineId: number; type: CommandType; testMode: boolean }
+): void {
+  if (existing.requestedByUserId !== requested.requesterId ||
+      existing.machineId !== requested.machineId ||
+      existing.type !== requested.type ||
+      existing.isTestMode !== (requested.testMode ? 1 : 0)) {
+    throw new Error("La clave de idempotencia ya pertenece a otra solicitud o usuario.");
+  }
+}
