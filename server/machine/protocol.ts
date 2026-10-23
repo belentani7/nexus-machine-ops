@@ -24,7 +24,10 @@ export function evaluateHumanApproval(input: { requesterId: number; approver: Pr
   const role = effectiveRole(input.approver);
   if (input.requesterId === input.approver.id) return { approved: false, decision: "rejected" as const, reason: "La independencia del tercer nodo prohíbe que el solicitante apruebe su propio comando." };
   if (role !== "approver" && role !== "policy_admin") return { approved: false, decision: "rejected" as const, reason: "El rol no puede aprobar operaciones." };
-  if (input.expiresAt.getTime() <= now.getTime()) return { approved: false, decision: "expired" as const, reason: "La ventana de aprobación expiró." };
+  // An invalid or missing timestamp must fail closed rather than bypass expiry (NaN comparisons are false).
+  const expires = input.expiresAt instanceof Date ? input.expiresAt.getTime() : NaN;
+  const current = now instanceof Date ? now.getTime() : NaN;
+  if (!Number.isFinite(expires) || !Number.isFinite(current) || expires <= current) return { approved: false, decision: "expired" as const, reason: "La ventana de aprobación expiró o su fecha no es válida." };
   return { approved: true, decision: "approved" as const, reason: "Aprobación humana explícita registrada para el modo simulación." };
 }
 
