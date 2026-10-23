@@ -31,7 +31,8 @@ import {
   XCircle,
   Zap,
 } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
+import { useMachineUpdates } from "@/hooks/useMachineUpdates";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
 
@@ -121,14 +122,15 @@ export default function Home() {
   const canApprove = Boolean(user && (user.role === "admin" || user.operationRole === "approver" || user.operationRole === "policy_admin"));
   const isRequester = activeCommand?.requestedByUserId === user?.id;
 
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    const stream = new EventSource("/api/machine/stream");
-    const refresh = () => utils.machine.snapshot.invalidate();
-    stream.addEventListener("ready", refresh);
-    stream.addEventListener("operations-update", refresh);
-    return () => stream.close();
-  }, [isAuthenticated, utils.machine.snapshot]);
+  const streamStatus = useMachineUpdates(isAuthenticated, () => {
+    void utils.machine.snapshot.invalidate();
+  });
+  const streamMessage = {
+    offline: "Sesión requerida para eventos",
+    connecting: "Conectando eventos del simulador…",
+    live: "Eventos del simulador conectados",
+    polling: "Sin eventos en directo · actualización periódica",
+  }[streamStatus];
 
   return (
     <DashboardLayout>
@@ -141,6 +143,7 @@ export default function Home() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Badge className="gap-1.5 border-cyan-200/20 bg-cyan-200/10 py-1.5 text-cyan-100 hover:bg-cyan-200/10"><Radar className="h-3.5 w-3.5" /> SOLO SIMULACIÓN</Badge>
+              <span role="status" aria-live="polite" className="inline-flex max-w-xs items-center rounded-full border border-white/15 bg-slate-950/30 px-3 py-1.5 text-xs text-slate-200">{streamMessage}</span>
               <Badge className="gap-1.5 border-emerald-200/20 bg-emerald-300/10 py-1.5 text-emerald-100 hover:bg-emerald-300/10"><Wifi className="h-3.5 w-3.5" /> Gateway conectado</Badge>
               <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300">Rol: <strong className="text-slate-100">{user?.role === "admin" ? "policy_admin" : user?.operationRole ?? "observer"}</strong></span>
             </div>
