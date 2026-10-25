@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { startLogin } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
+import { SIDEBAR_WIDTH_KEY, readSidebarWidth, persistSidebarWidth, sidebarWidthForKey, MIN_SIDEBAR_WIDTH, MAX_SIDEBAR_WIDTH } from "@/lib/sidebarWidth";
 import { Gauge, LogOut, PanelLeft } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
@@ -31,24 +32,18 @@ const menuItems = [
   { icon: Gauge, label: "Centro de operaciones", path: "/" },
 ];
 
-const SIDEBAR_WIDTH_KEY = "sidebar-width";
-const DEFAULT_WIDTH = 280;
-const MIN_WIDTH = 200;
-const MAX_WIDTH = 480;
-
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [sidebarWidth, setSidebarWidth] = useState(() => {
-    const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY);
-    return saved ? parseInt(saved, 10) : DEFAULT_WIDTH;
-  });
+  const [sidebarWidth, setSidebarWidth] = useState(() =>
+    readSidebarWidth(() => window.localStorage.getItem(SIDEBAR_WIDTH_KEY))
+  );
   const { loading, user } = useAuth();
 
   useEffect(() => {
-    localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.toString());
+    persistSidebarWidth(value => window.localStorage.setItem(SIDEBAR_WIDTH_KEY, value), sidebarWidth);
   }, [sidebarWidth]);
 
   if (loading) {
@@ -87,7 +82,7 @@ export default function DashboardLayout({
         } as CSSProperties
       }
     >
-      <DashboardLayoutContent setSidebarWidth={setSidebarWidth}>
+      <DashboardLayoutContent setSidebarWidth={setSidebarWidth} sidebarWidth={sidebarWidth}>
         {children}
       </DashboardLayoutContent>
     </SidebarProvider>
@@ -97,11 +92,13 @@ export default function DashboardLayout({
 type DashboardLayoutContentProps = {
   children: React.ReactNode;
   setSidebarWidth: (width: number) => void;
+  sidebarWidth: number;
 };
 
 function DashboardLayoutContent({
   children,
   setSidebarWidth,
+  sidebarWidth,
 }: DashboardLayoutContentProps) {
   const { user, logout } = useAuth();
   const [location, setLocation] = useLocation();
@@ -124,7 +121,7 @@ function DashboardLayoutContent({
 
       const sidebarLeft = sidebarRef.current?.getBoundingClientRect().left ?? 0;
       const newWidth = e.clientX - sidebarLeft;
-      if (newWidth >= MIN_WIDTH && newWidth <= MAX_WIDTH) {
+      if (newWidth >= MIN_SIDEBAR_WIDTH && newWidth <= MAX_SIDEBAR_WIDTH) {
         setSidebarWidth(newWidth);
       }
     };
@@ -230,10 +227,24 @@ function DashboardLayoutContent({
           </SidebarFooter>
         </Sidebar>
         <div
-          className={`absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-primary/20 transition-colors ${isCollapsed ? "hidden" : ""}`}
+          role="separator"
+          aria-label="Ajustar anchura de la navegación"
+          aria-orientation="vertical"
+          aria-valuemin={MIN_SIDEBAR_WIDTH}
+          aria-valuemax={MAX_SIDEBAR_WIDTH}
+          aria-valuenow={sidebarWidth}
+          tabIndex={isCollapsed || isMobile ? -1 : 0}
+          title="Arrastra o usa las flechas izquierda/derecha, Inicio y Fin"
+          className={`absolute top-0 right-0 w-2 h-full cursor-col-resize hover:bg-primary/20 focus-visible:bg-primary/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-300 transition-colors ${isCollapsed || isMobile ? "hidden" : ""}`}
           onMouseDown={() => {
-            if (isCollapsed) return;
+            if (isCollapsed || isMobile) return;
             setIsResizing(true);
+          }}
+          onKeyDown={event => {
+            const next = sidebarWidthForKey(event.key, sidebarWidth);
+            if (next === null) return;
+            event.preventDefault();
+            setSidebarWidth(next);
           }}
           style={{ zIndex: 50 }}
         />
