@@ -61,6 +61,21 @@ describe("NEXUS simulation SSE resiliency", () => {
     stop();
   });
 
+  it("refreshes only once when the first post-reconnect signal is an update", () => {
+    const f = fixture();
+    const stop = f.monitor();
+    f.source.emit("open");
+    expect(f.refresh).toHaveBeenCalledTimes(1);
+    f.source.emit("error");
+    expect(f.refresh).toHaveBeenCalledTimes(2);
+    f.source.emit("operations-update");
+    expect(f.onStatus).toHaveBeenLastCalledWith("live");
+    expect(f.refresh).toHaveBeenCalledTimes(3);
+    f.source.emit("operations-update");
+    expect(f.refresh).toHaveBeenCalledTimes(4);
+    stop();
+  });
+
   it("detects a silent connection and recovers on heartbeat", () => {
     const f = fixture();
     const stop = f.monitor();
