@@ -51,13 +51,15 @@ export function monitorMachineUpdates({
     }
   }
   function connected() {
-    if (cancelled) return;
+    if (cancelled) return false;
     lastSignal = clock();
     stopFallback();
     if (currentStatus !== "live") {
       status("live");
       refreshSafely();
+      return true;
     }
+    return false;
   }
 
   status("connecting");
@@ -75,8 +77,9 @@ export function monitorMachineUpdates({
     source.addEventListener("ready", connected);
     source.addEventListener("heartbeat", connected);
     source.addEventListener("operations-update", () => {
-      connected();
-      refreshSafely();
+      // A data event can be the first signal after reconnect. The transition
+      // already refreshes the snapshot, so avoid a duplicate API request.
+      if (!connected()) refreshSafely();
     });
     source.addEventListener("error", startFallback);
   } catch {
