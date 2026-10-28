@@ -27,11 +27,12 @@ import {
   Square,
   Thermometer,
   UserCheck,
-  Wifi,
   XCircle,
   Zap,
 } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { appendTelemetryReading, type TelemetryPoint } from "@/lib/telemetryHistory";
+import { useMachineUpdates } from "@/hooks/useMachineUpdates";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
 
@@ -96,6 +97,20 @@ export default function Home() {
   });
 
   const data = snapshot.data;
+  const [telemetryHistory, setTelemetryHistory] = useState<TelemetryPoint[]>([]);
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setTelemetryHistory([]);
+      return;
+    }
+    if (!data || !snapshot.dataUpdatedAt) return;
+    setTelemetryHistory(previous => appendTelemetryReading(previous, {
+      machineId: data.machine.machineKey,
+      capturedAt: snapshot.dataUpdatedAt,
+      temperature: data.telemetry.temperature,
+      power: data.telemetry.power,
+    }));
+  }, [isAuthenticated, data, snapshot.dataUpdatedAt]);
   const activeCommand = data?.commands.find(item => item.status === "awaiting_human") ?? data?.commands[0];
   const validations = useMemo(() => {
     const byNode = new Map<string, (typeof data extends undefined ? never : NonNullable<typeof data>["validations"][number])>();
@@ -105,14 +120,6 @@ export default function Home() {
     });
     return byNode;
   }, [activeCommand, data]);
-  const telemetryHistory = useMemo(() => data ? [
-    { point: "-4", temperature: Math.max(20, data.telemetry.temperature - 2.2), power: Math.max(0, data.telemetry.power - 1) },
-    { point: "-3", temperature: Math.max(20, data.telemetry.temperature - 1), power: Math.max(0, data.telemetry.power - .4) },
-    { point: "-2", temperature: data.telemetry.temperature - .5, power: data.telemetry.power + .2 },
-    { point: "-1", temperature: data.telemetry.temperature - .9, power: Math.max(0, data.telemetry.power - .3) },
-    { point: "now", temperature: data.telemetry.temperature, power: data.telemetry.power },
-  ] : [], [data]);
-
   const requestCommand = (type: CommandType) => {
     if (!data) return;
     request.mutate({ machineId: data.machine.id, type, testMode: true, idempotencyKey: crypto.randomUUID() });
@@ -121,14 +128,15 @@ export default function Home() {
   const canApprove = Boolean(user && (user.role === "admin" || user.operationRole === "approver" || user.operationRole === "policy_admin"));
   const isRequester = activeCommand?.requestedByUserId === user?.id;
 
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    const stream = new EventSource("/api/machine/stream");
-    const refresh = () => utils.machine.snapshot.invalidate();
-    stream.addEventListener("ready", refresh);
-    stream.addEventListener("operations-update", refresh);
-    return () => stream.close();
-  }, [isAuthenticated, utils.machine.snapshot]);
+  const streamStatus = useMachineUpdates(isAuthenticated, () => {
+    void utils.machine.snapshot.invalidate();
+  });
+  const streamMessage = {
+    offline: "Sesión requerida para eventos",
+    connecting: "Conectando eventos del simulador…",
+    live: "Eventos del simulador conectados",
+    polling: "Sin eventos en directo · actualización periódica",
+  }[streamStatus];
 
   return (
     <DashboardLayout>
@@ -141,7 +149,8 @@ export default function Home() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Badge className="gap-1.5 border-cyan-200/20 bg-cyan-200/10 py-1.5 text-cyan-100 hover:bg-cyan-200/10"><Radar className="h-3.5 w-3.5" /> SOLO SIMULACIÓN</Badge>
-              <Badge className="gap-1.5 border-emerald-200/20 bg-emerald-300/10 py-1.5 text-emerald-100 hover:bg-emerald-300/10"><Wifi className="h-3.5 w-3.5" /> Gateway conectado</Badge>
+              <span role="status" aria-live="polite" className="inline-flex max-w-xs items-center rounded-full border border-white/15 bg-slate-950/30 px-3 py-1.5 text-xs text-slate-200">{streamMessage}</span>
+              <Badge className="gap-1.5 border-slate-200/20 bg-slate-300/10 py-1.5 text-slate-100 hover:bg-slate-300/10"><ShieldCheck className="h-3.5 w-3.5" /> Gateway de simulación</Badge>
               <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300">Rol: <strong className="text-slate-100">{user?.role === "admin" ? "policy_admin" : user?.operationRole ?? "observer"}</strong></span>
             </div>
           </header>
@@ -175,7 +184,7 @@ export default function Home() {
             </section>
 
             <section className="grid gap-4 xl:grid-cols-[.9fr_1.1fr]">
-              <Card className="ops-glass border-0"><CardContent className="p-5"><div className="flex items-center justify-between"><div><p className="text-xs uppercase tracking-[.18em] text-slate-400">Live telemetry</p><h2 className="mt-1 text-lg font-semibold text-white">Temperatura y potencia</h2></div><span className="text-xs text-slate-400">Actualización 2,5 s</span></div><div className="mt-5 h-48"><ResponsiveContainer width="100%" height="100%"><AreaChart data={telemetryHistory}><defs><linearGradient id="telemetryFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#67e8f9" stopOpacity={.35} /><stop offset="100%" stopColor="#67e8f9" stopOpacity={0} /></linearGradient></defs><XAxis dataKey="point" hide /><YAxis hide domain={[0, "dataMax + 8"]} /><Tooltip contentStyle={{ background: "#102334", border: "1px solid rgba(207,250,254,.2)", borderRadius: 12 }} /><Area type="monotone" dataKey="temperature" stroke="#a5f3fc" strokeWidth={2} fill="url(#telemetryFill)" /><Area type="monotone" dataKey="power" stroke="#a7f3d0" strokeWidth={1.5} fill="transparent" /></AreaChart></ResponsiveContainer></div></CardContent></Card>
+              <Card className="ops-glass border-0"><CardContent className="p-5"><div className="flex items-center justify-between"><div><p className="text-xs uppercase tracking-[.18em] text-slate-400">Telemetría observada</p><h2 className="mt-1 text-lg font-semibold text-white">Temperatura y potencia</h2></div><span className="text-xs text-slate-400">{telemetryHistory.length} muestras de esta sesión</span></div><div className="mt-5 h-48">{telemetryHistory.length < 2 ? <p role="status" className="flex h-full items-center justify-center rounded-xl border border-dashed border-white/15 px-6 text-center text-sm text-slate-400">Esperando una segunda lectura del simulador para mostrar una tendencia observada.</p> : <div role="img" aria-label={`Gráfico con ${telemetryHistory.length} lecturas observadas de temperatura y potencia del simulador`} className="h-full"><ResponsiveContainer width="100%" height="100%"><AreaChart data={telemetryHistory}><defs><linearGradient id="telemetryFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#67e8f9" stopOpacity={.35} /><stop offset="100%" stopColor="#67e8f9" stopOpacity={0} /></linearGradient></defs><XAxis dataKey="point" hide /><YAxis hide domain={[0, "dataMax + 8"]} /><Tooltip contentStyle={{ background: "#102334", border: "1px solid rgba(207,250,254,.2)", borderRadius: 12 }} /><Area type="monotone" dataKey="temperature" stroke="#a5f3fc" strokeWidth={2} fill="url(#telemetryFill)" /><Area type="monotone" dataKey="power" stroke="#a7f3d0" strokeWidth={1.5} fill="transparent" /></AreaChart></ResponsiveContainer></div>}</div></CardContent></Card>
               <Card className="ops-glass border-0"><CardContent className="p-5"><div className="flex items-center justify-between"><div><p className="text-xs uppercase tracking-[.18em] text-slate-400">Audit stream</p><h2 className="mt-1 text-lg font-semibold text-white">Trazabilidad append-only</h2></div><span className="text-xs text-slate-400">Hash encadenado</span></div><div className="mt-4 max-h-52 space-y-2 overflow-auto pr-1">{data.audit.slice(0, 7).map(item => <div key={item.sequence} className="flex gap-3 rounded-lg border border-white/7 bg-slate-950/20 px-3 py-2"><div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-cyan-200 shadow-[0_0_10px_rgba(103,232,249,.8)]" /><div className="min-w-0 flex-1"><div className="flex items-center justify-between gap-3"><span className="truncate text-xs font-medium text-slate-100">{item.reason}</span><span className="shrink-0 text-[10px] text-slate-500">{time(item.createdAt)}</span></div><p className="mt-1 text-[10px] uppercase tracking-[.13em] text-slate-500">{item.node} · {item.decision} · #{item.sequence}</p></div></div>)}</div></CardContent></Card>
             </section>
 
